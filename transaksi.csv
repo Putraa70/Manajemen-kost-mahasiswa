@@ -1,0 +1,5 @@
+ID Transaksi,ID Reservasi,Metode Pembayaran,Total Bayar,Status,Waktu Transaksi
+1,R001,Cash,250000,Berhasil,15-06-2024 14:30
+2,R002,Debit,350000,Berhasil,16-06-2024 10:15
+3,R003,Transfer,500000,Berhasil,17-06-2024 09:00
+4,4,cash,120.000,Berhasil,09-11-2024 12:00
