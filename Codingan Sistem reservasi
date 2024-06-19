@@ -170,3 +170,214 @@ def impor_data_transaksi_csv(file_path):
         for row in reader:
             transaksi = Transaksi(row['ID Transaksi'], row['ID Reservasi'], row['Metode Pembayaran'], row['Total Bayar'], row['Status'], row['Waktu Transaksi'])
             daftar_transaksi.append(transaksi)
+
+# Fungsi Otentikasi
+def simpan_data_pengguna_csv(users):
+    with open(user_csv_path, 'w', newline='') as csvfile:
+        fieldnames = ['Username', 'Password', 'Email']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for user in users:
+            writer.writerow(user)
+
+def impor_data_pengguna_csv():
+    users = []
+    try:
+        with open(user_csv_path, newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                users.append({'Username': row['Username'], 'Password': row['Password'], 'Email': row['Email']})
+    except FileNotFoundError:
+        pass
+    return users
+
+# Fungsi Login, Signup, Lupa Password, dan Logout
+def login(username, password, users):
+    for user in users:
+        if user['Username'] == username and user['Password'] == password:
+            return True
+    return False
+
+def signup(username, password, email, users):
+    for user in users:
+        if user['Username'] == username:
+            return False
+    users.append({'Username': username, 'Password': password, 'Email': email})
+    simpan_data_pengguna_csv(users)
+    return True
+
+def lupa_password(username, email, users):
+    for user in users:
+        if user['Username'] == username and user['Email'] == email:
+            return user['Password']
+    return None
+
+# Fungsi GUI untuk Otentikasi
+def gui_login():
+    username = simpledialog.askstring("Login", "Username:")
+    password = simpledialog.askstring("Login", "Password:", show='*')
+    if login(username, password, users):
+        messagebox.showinfo("Login", "Login berhasil!")
+        login_frame.pack_forget()
+        menu_utama()
+    else:
+        messagebox.showwarning("Login", "Username atau Password salah!")
+
+def gui_signup():
+    username = simpledialog.askstring("Signup", "Username:")
+    password = simpledialog.askstring("Signup", "Password:", show='*')
+    email = simpledialog.askstring("Signup", "Email:")
+    if signup(username, password, email, users):
+        messagebox.showinfo("Signup", "Signup berhasil!")
+    else:
+        messagebox.showwarning("Signup", "Username sudah digunakan!")
+
+def gui_lupa_password():
+    username = simpledialog.askstring("Lupa Password", "Username:")
+    email = simpledialog.askstring("Lupa Password", "Email:")
+    password = lupa_password(username, email, users)
+    if password:
+        messagebox.showinfo("Lupa Password", f"Password Anda adalah: {password}")
+    else:
+        messagebox.showwarning("Lupa Password", "Username atau Email salah!")
+
+def gui_logout():
+    messagebox.showinfo("Logout", "Logout berhasil!")
+    root.quit()
+
+# GUI Menu Utama
+def menu_utama():
+    menu = tk.Toplevel()
+    menu.title("Menu Utama")
+
+    frame = tk.Frame(menu)
+    frame.pack(pady=20)
+
+    tk.Label(frame, text="Menu Utama", font=("Arial", 16)).grid(row=0, columnspan=2, pady=10)
+
+    tk.Button(frame, text="Tambah Pengunjung", command=gui_tambah_pengunjung).grid(row=1, column=0, pady=5)
+    tk.Button(frame, text="Lihat Pengunjung", command=gui_lihat_pengunjung).grid(row=1, column=1, pady=5)
+    tk.Button(frame, text="Update Pengunjung", command=gui_update_pengunjung).grid(row=2, column=0, pady=5)
+    tk.Button(frame, text="Hapus Pengunjung", command=gui_hapus_pengunjung).grid(row=2, column=1, pady=5)
+
+    tk.Button(frame, text="Tambah Reservasi", command=gui_tambah_reservasi).grid(row=3, column=0, pady=5)
+    tk.Button(frame, text="Lihat Reservasi", command=gui_lihat_reservasi).grid(row=3, column=1, pady=5)
+    tk.Button(frame, text="Update Reservasi", command=gui_update_reservasi).grid(row=4, column=0, pady=5)
+    tk.Button(frame, text="Hapus Reservasi", command=gui_hapus_reservasi).grid(row=4, column=1, pady=5)
+
+    tk.Button(frame, text="Tambah Transaksi", command=gui_tambah_transaksi).grid(row=5, column=0, pady=5)
+    tk.Button(frame, text="Lihat Riwayat Transaksi", command=gui_lihat_transaksi).grid(row=5, column=1, pady=5)
+
+    tk.Button(frame, text="Logout", command=gui_logout).grid(row=6, columnspan=2, pady=10)
+
+# Fungsi GUI untuk Operasi CRUD
+def gui_tambah_pengunjung():
+    id_pengunjung = simpledialog.askstring("Input", "ID Pengunjung:")
+    nama = simpledialog.askstring("Input", "Nama:")
+    alamat = simpledialog.askstring("Input", "Alamat:")
+    telepon = simpledialog.askstring("Input", "Telepon:")
+    if id_pengunjung and nama and alamat and telepon:
+        pengunjung = Pengunjung(nama, alamat, telepon, id_pengunjung)
+        tambah_pengunjung(pengunjung)
+        messagebox.showinfo("Info", "Pengunjung berhasil ditambahkan!")
+    else:
+        messagebox.showwarning("Warning", "Semua data harus diisi!")
+
+def gui_lihat_pengunjung():
+    data = lihat_pengunjung()
+    messagebox.showinfo("Data Pengunjung", data)
+
+def gui_update_pengunjung():
+    id_pengunjung = simpledialog.askstring("Input", "ID Pengunjung:")
+    if id_pengunjung:
+        nama = simpledialog.askstring("Input", "Nama baru (kosongkan jika tidak ingin mengubah):")
+        alamat = simpledialog.askstring("Input", "Alamat baru (kosongkan jika tidak ingin mengubah):")
+        telepon = simpledialog.askstring("Input", "Telepon baru (kosongkan jika tidak ingin mengubah):")
+        if update_pengunjung(id_pengunjung, nama, alamat, telepon):
+            messagebox.showinfo("Info", "Pengunjung berhasil diperbarui!")
+        else:
+            messagebox.showwarning("Warning", "Pengunjung tidak ditemukan!")
+
+def gui_hapus_pengunjung():
+    id_pengunjung = simpledialog.askstring("Input", "ID Pengunjung:")
+    if id_pengunjung:
+        hapus_pengunjung(id_pengunjung)
+        messagebox.showinfo("Info", "Pengunjung berhasil dihapus!")
+    else:
+        messagebox.showwarning("Warning", "ID Pengunjung harus diisi!")
+
+def gui_tambah_reservasi():
+    id_reservasi = simpledialog.askstring("Input", "ID Reservasi:")
+    id_pengunjung = simpledialog.askstring("Input", "ID Pengunjung:")
+    tanggal = simpledialog.askstring("Input", "Tanggal (Format: DD-MM-YYYY):")
+    tempat = simpledialog.askstring("Input", "Tempat:")
+    if id_reservasi and id_pengunjung and tanggal and tempat:
+        reservasi = Reservasi(id_reservasi, id_pengunjung, tanggal, tempat)
+        tambah_reservasi(reservasi)
+        messagebox.showinfo("Info", "Reservasi berhasil ditambahkan!")
+    else:
+        messagebox.showwarning("Warning", "Semua data harus diisi!")
+
+def gui_lihat_reservasi():
+    data = lihat_reservasi()
+    messagebox.showinfo("Data Reservasi", data)
+
+def gui_update_reservasi():
+    id_reservasi = simpledialog.askstring("Input", "ID Reservasi:")
+    if id_reservasi:
+        id_pengunjung = simpledialog.askstring("Input", "ID Pengunjung baru (kosongkan jika tidak ingin mengubah):")
+        tanggal = simpledialog.askstring("Input", "Tanggal baru (Format: DD-MM-YYYY, kosongkan jika tidak ingin mengubah):")
+        tempat = simpledialog.askstring("Input", "Tempat baru (kosongkan jika tidak ingin mengubah):")
+        if update_reservasi(id_reservasi, id_pengunjung, tanggal, tempat):
+            messagebox.showinfo("Info", "Reservasi berhasil diperbarui!")
+        else:
+            messagebox.showwarning("Warning", "Reservasi tidak ditemukan!")
+
+def gui_hapus_reservasi():
+    id_reservasi = simpledialog.askstring("Input", "ID Reservasi:")
+    if id_reservasi:
+        hapus_reservasi(id_reservasi)
+        messagebox.showinfo("Info", "Reservasi berhasil dihapus!")
+    else:
+        messagebox.showwarning("Warning", "ID Reservasi harus diisi!")
+
+def gui_tambah_transaksi():
+    id_reservasi = simpledialog.askstring("Input", "ID Reservasi:")
+    metode_pembayaran = simpledialog.askstring("Input", "Metode Pembayaran (Cash/Debit/Transfer):")
+    total_bayar = simpledialog.askstring("Input", "Total Bayar:")
+    waktu_transaksi = simpledialog.askstring("Input", "Waktu Transaksi (Format: DD-MM-YYYY HH:MM):")
+    if id_reservasi and metode_pembayaran and total_bayar and waktu_transaksi:
+        id_transaksi = str(len(daftar_transaksi) + 1)
+        status = "Berhasil"
+        transaksi = Transaksi(id_transaksi, id_reservasi, metode_pembayaran, total_bayar, status, waktu_transaksi)
+        tambah_transaksi(transaksi)
+        messagebox.showinfo("Info", "Transaksi berhasil ditambahkan!")
+    else:
+        messagebox.showwarning("Warning", "Semua data harus diisi!")
+
+def gui_lihat_transaksi():
+    data = lihat_transaksi()
+    messagebox.showinfo("Riwayat Transaksi", data)
+
+# Setup GUI untuk Otentikasi
+root = tk.Tk()
+root.title("Sistem Manajemen Reservasi Wisata")
+
+users = impor_data_pengguna_csv()
+
+login_frame = tk.Frame(root)
+login_frame.pack(pady=20)
+
+tk.Label(login_frame, text="Sistem Manajemen Reservasi Wisata", font=("Arial", 16)).grid(row=0, columnspan=4, pady=10)
+
+tk.Button(login_frame, text="Login", command=gui_login).grid(row=1, column=0, pady=5, padx=5)
+tk.Button(login_frame, text="Signup", command=gui_signup).grid(row=1, column=1, pady=5, padx=5)
+tk.Button(login_frame, text="Lupa Password", command=gui_lupa_password).grid(row=1, column=2, pady=5, padx=5)
+tk.Button(login_frame, text="Logout", command=gui_logout).grid(row=1, column=3, pady=5, padx=5)
+
+# Impor Data saat Aplikasi Dimulai
+impor_data_pengunjung_csv(pengunjung_csv_path)
+impor_data_reservasi_csv(reservasi_csv_path)
+impor_data_transaksi_csv(transaksi_csv_path)
+
+root.mainloop()
