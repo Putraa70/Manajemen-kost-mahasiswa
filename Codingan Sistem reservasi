@@ -1,0 +1,172 @@
+import csv
+import tkinter as tk
+from tkinter import messagebox, simpledialog
+
+# Class Pengunjung, Reservasi, dan Transaksi
+class Pengunjung:
+    def __init__(self, nama, alamat, telepon, id_pengunjung):
+        self.nama = nama
+        self.alamat = alamat
+        self.telepon = telepon
+        self.id_pengunjung = id_pengunjung
+
+    def __str__(self):
+        return f"{self.nama} (ID: {self.id_pengunjung}, Telepon: {self.telepon}, Alamat: {self.alamat})"
+
+class Reservasi:
+    def __init__(self, id_reservasi, id_pengunjung, tanggal, tempat):
+        self.id_reservasi = id_reservasi
+        self.id_pengunjung = id_pengunjung
+        self.tanggal = tanggal
+        self.tempat = tempat
+
+    def __str__(self):
+        return f"Reservasi ID: {self.id_reservasi}, Pengunjung ID: {self.id_pengunjung}, Tanggal: {self.tanggal}, Tempat: {self.tempat}"
+
+class Transaksi:
+    def __init__(self, id_transaksi, id_reservasi, metode_pembayaran, total_bayar, status, waktu_transaksi):
+        self.id_transaksi = id_transaksi
+        self.id_reservasi = id_reservasi
+        self.metode_pembayaran = metode_pembayaran
+        self.total_bayar = total_bayar
+        self.status = status
+        self.waktu_transaksi = waktu_transaksi
+
+    def __str__(self):
+        return f"Transaksi ID: {self.id_transaksi}, Reservasi ID: {self.id_reservasi}, Metode Pembayaran: {self.metode_pembayaran}, Total Bayar: {self.total_bayar}, Status: {self.status}, Waktu Transaksi: {self.waktu_transaksi}"
+
+# List untuk Menyimpan Pengunjung, Reservasi, dan Transaksi
+daftar_pengunjung = []
+daftar_reservasi = []
+daftar_transaksi = []
+
+# Path File CSV
+pengunjung_csv_path = 'data.csv'
+reservasi_csv_path = 'reservasi.csv'
+transaksi_csv_path = 'transaksi.csv'
+user_csv_path = 'users.csv'
+
+# Fungsi CRUD untuk Pengunjung
+def tambah_pengunjung(pengunjung):
+    daftar_pengunjung.append(pengunjung)
+    simpan_data_pengunjung_csv()
+
+def lihat_pengunjung():
+    return "\n".join([str(p) for p in daftar_pengunjung])
+
+def update_pengunjung(id_pengunjung, nama=None, alamat=None, telepon=None):
+    for pengunjung in daftar_pengunjung:
+        if pengunjung.id_pengunjung == id_pengunjung:
+            if nama:
+                pengunjung.nama = nama
+            if alamat:
+                pengunjung.alamat = alamat
+            if telepon:
+                pengunjung.telepon = telepon
+            simpan_data_pengunjung_csv()
+            return True
+    return False
+
+def hapus_pengunjung(id_pengunjung):
+    global daftar_pengunjung
+    daftar_pengunjung = [pengunjung for pengunjung in daftar_pengunjung if pengunjung.id_pengunjung != id_pengunjung]
+    simpan_data_pengunjung_csv()
+
+# Fungsi CRUD untuk Reservasi
+def tambah_reservasi(reservasi):
+    daftar_reservasi.append(reservasi)
+    simpan_data_reservasi_csv()
+
+def lihat_reservasi():
+    return "\n".join([str(r) for r in daftar_reservasi])
+
+def update_reservasi(id_reservasi, id_pengunjung=None, tanggal=None, tempat=None):
+    for reservasi in daftar_reservasi:
+        if reservasi.id_reservasi == id_reservasi:
+            if id_pengunjung:
+                reservasi.id_pengunjung = id_pengunjung
+            if tanggal:
+                reservasi.tanggal = tanggal
+            if tempat:
+                reservasi.tempat = tempat
+            simpan_data_reservasi_csv()
+            return True
+    return False
+
+def hapus_reservasi(id_reservasi):
+    global daftar_reservasi
+    daftar_reservasi = [reservasi for reservasi in daftar_reservasi if reservasi.id_reservasi != id_reservasi]
+    simpan_data_reservasi_csv()
+
+# Fungsi CRUD untuk Transaksi
+def tambah_transaksi(transaksi):
+    daftar_transaksi.append(transaksi)
+    simpan_data_transaksi_csv()
+
+def lihat_transaksi():
+    return "\n".join([str(t) for t in daftar_transaksi])
+
+
+# Simpan Data CSV
+def simpan_data_pengunjung_csv():
+    with open(pengunjung_csv_path, 'w', newline='') as csvfile:
+        fieldnames = ['ID Pengunjung', 'Nama', 'Alamat', 'Telepon']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for pengunjung in daftar_pengunjung:
+            writer.writerow({
+                'ID Pengunjung': pengunjung.id_pengunjung,
+                'Nama': pengunjung.nama,
+                'Alamat': pengunjung.alamat,
+                'Telepon': pengunjung.telepon
+            })
+
+def simpan_data_reservasi_csv():
+    with open(reservasi_csv_path, 'w', newline='') as csvfile:
+        fieldnames = ['ID Reservasi', 'ID Pengunjung', 'Tanggal', 'Tempat']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for reservasi in daftar_reservasi:
+            writer.writerow({
+                'ID Reservasi': reservasi.id_reservasi,
+                'ID Pengunjung': reservasi.id_pengunjung,
+                'Tanggal': reservasi.tanggal,
+                'Tempat': reservasi.tempat
+            })
+
+def simpan_data_transaksi_csv():
+    with open(transaksi_csv_path, 'w', newline='') as csvfile:
+        fieldnames = ['ID Transaksi', 'ID Reservasi', 'Metode Pembayaran', 'Total Bayar', 'Status', 'Waktu Transaksi']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for transaksi in daftar_transaksi:
+            writer.writerow({
+                'ID Transaksi': transaksi.id_transaksi,
+                'ID Reservasi': transaksi.id_reservasi,
+                'Metode Pembayaran': transaksi.metode_pembayaran,
+                'Total Bayar': transaksi.total_bayar,
+                'Status': transaksi.status,
+                'Waktu Transaksi': transaksi.waktu_transaksi
+            })
+
+# Impor Data CSV
+def impor_data_pengunjung_csv(file_path):
+    with open(file_path, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            pengunjung = Pengunjung(row['Nama'], row['Alamat'], row['Telepon'], row['ID Pengunjung'])
+            daftar_pengunjung.append(pengunjung)
+
+def impor_data_reservasi_csv(file_path):
+    with open(file_path, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            reservasi = Reservasi(row['ID Reservasi'], row['ID Pengunjung'], row['Tanggal'], row['Tempat'])
+            daftar_reservasi.append(reservasi)
+
+def impor_data_transaksi_csv(file_path):
+    with open(file_path, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            transaksi = Transaksi(row['ID Transaksi'], row['ID Reservasi'], row['Metode Pembayaran'], row['Total Bayar'], row['Status'], row['Waktu Transaksi'])
+            daftar_transaksi.append(transaksi)
